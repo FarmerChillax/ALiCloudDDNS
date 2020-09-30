@@ -1,7 +1,7 @@
 import time
 import json
 import os
-import sys
+
 from ddns_pack import domain_name_control, GetIP
 
 # 1. 获取解析ip
@@ -22,23 +22,37 @@ def write_log(My_ip):
     print("[INFO] Writting log ...")
 
 # main
-def main(DomainName):
-    cloud_ip, cloud_data = domain_name_control.get_cloud_ip(DomainName)
+def main(DomainName, RR_list):
+    # 获取解析的数据(json格式)， 仅返回用户指定的主机记录
+    cloud_ip, cloud_data = domain_name_control.get_cloud_ip(DomainName, RR_list)
     print("my cloud ip :" + cloud_ip)
     while True:
         try:
-            my_ip = GetIP.get_ip()
+            my_ip = GetIP.get_ip() # 通过循环链表获取本机ip地址
+            # 判断解析的ip与local ip是否一致， 不一致就更新
             if cloud_ip != my_ip:
-                domain_name_control.updata_ip(cloud_data, my_ip)
-                cloud_ip = my_ip
+                for data in cloud_data:
+                    if(data['RR'] in RR_list):
+                        domain_name_control.updata_ip(data, my_ip)
+                cloud_ip = my_ip # 更新本机ip
+                # 写日志
                 write_log(my_ip)
         except Exception as base:
             print(base)
             time.sleep(10)
         
         print("Waiting for IP change...")
-        time.sleep(6)
+        time.sleep(600)
 
-DomainName = 'farmer233.xyz'  # 需要动态解析的域名
+
+# 读取数据
+with open('config.json', 'r') as f:
+    data = json.load(f)
+
+DomainName = data["name"]
+RR_list = data["RR_list"]
+
 path = os.getcwd()
-main(DomainName)
+
+# run
+main(DomainName, RR_list)

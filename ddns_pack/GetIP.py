@@ -3,8 +3,6 @@ import socket
 import time
 import json
 
-# url_1 = 'http://www.3322.org/dyndns/getip'
-
 class ListNode():
     def __init__(self, x):
         self.val = x
@@ -75,11 +73,8 @@ def main(function_point):
 
 # API function
 function_point = add_function()
-print(type(function_point))
+
 def get_ip():
     myip = main(function_point)
     print("[INFO] GetIP msg: Get IP successfully, localIP :" + myip)
     return myip
-
-# print(get_ip())
-# print(type(get_ip()))
