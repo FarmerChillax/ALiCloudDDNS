@@ -1,0 +1,6 @@
+{
+    "accessKeyId": "Your Ali accessKeyID",
+    "accessSecret": "Your Ali accessSecret",
+    "name": "Domain Name",
+    "RR_list": ["@", "www", "RR_Type"]
+}
