@@ -51,8 +51,9 @@ with open('config.json', 'r') as f:
 
 DomainName = data["name"]
 RR_list = data["RR_list"]
-
 path = os.getcwd()
 
 # run
-main(DomainName, RR_list)
+if __name__ == "__main__":
+    main(DomainName, RR_list)
+    
