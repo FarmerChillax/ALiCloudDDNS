@@ -1,0 +1,13 @@
+[Unit]
+Description=My ALiDDNS Client
+
+[Service]
+Type=simple
+WorkingDirectory=<your work directory> 
+ExecStart= <Commands to run>  #  e.g python3 ddnsCore.py
+KillMode=process
+Restart=on-failure
+RestartSec=3s
+
+[Install]
+WantedBy=multi-user.target

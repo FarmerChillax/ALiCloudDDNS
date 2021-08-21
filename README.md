@@ -14,8 +14,6 @@
 clone:
 
 ```shell
-$ git clone https://github.com/greyli/sayhello.git # Github
-
 $ git clone https://gitee.com/Farmer-chong/ALiCloudDDNS.git # Gitee
 
 ```
@@ -32,4 +30,32 @@ $ pip install -r requirements.txt
 运行DDNS:
 ```shell
 $ python3 ddnsCore.py # use `python ddnsCore.py` on windows
+```
+
+## 进程守护
+
+1. 复制`ddns.service`文件到 `/etc/systemd/system/`目录下
+2. 编辑`ddns.service`
+   1. 修改里面的运行目录`WorkingDirectory`为你项目的根目录
+   2. 修改里面的运行命令`ExecStart`为启动命令
+3. 设置守护进程`systemctl enable ddns.service`
+4. 启动守护进程`systemctl start ddns.service`
+
+**注意⚠**如果python使用了虚拟环境，请使用虚拟环境中的python,如`/<env directory>/bin/python3`
+
+ddns.service.bak
+```shell
+[Unit]
+Description=My ALiDDNS Client
+
+[Service]
+Type=simple
+WorkingDirectory=<your work directory> 
+ExecStart= <Commands to run>  #  e.g python3 ddnsCore.py
+KillMode=process
+Restart=on-failure
+RestartSec=3s
+
+[Install]
+WantedBy=multi-user.target
 ```
