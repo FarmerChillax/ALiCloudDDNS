@@ -1,8 +1,7 @@
 import time
 import json
 import os
-
-from ddns_pack import domain_name_control, GetIP
+from ddns_pack import domain_name_control, GetIP, settings
 
 # 1. 获取解析ip
 # 2. 获取本机ip
@@ -46,11 +45,13 @@ def main(DomainName, RR_list):
 
 
 # 读取数据
-with open('config.json', 'r') as f:
-    data = json.load(f)
 
-DomainName = data["name"]
-RR_list = data["RR_list"]
+
+
+
+
+DomainName = settings.DomainName
+RR_list = settings.RR_list
 path = os.getcwd()
 
 # run

@@ -1,5 +1,5 @@
-aliyun-python-sdk-alidns==2.0.18
 aliyun-python-sdk-core==2.13.15
+aliyun-python-sdk-alidns==2.0.18
 aliyun-python-sdk-domain==3.14.2
 appdirs==1.4.3
 astroid==2.3.3

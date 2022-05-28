@@ -5,13 +5,8 @@ from aliyunsdkcore.acs_exception.exceptions import ServerException
 from aliyunsdkalidns.request.v20150109.DescribeDomainRecordsRequest import DescribeDomainRecordsRequest 
 from aliyunsdkalidns.request.v20150109.UpdateDomainRecordRequest import UpdateDomainRecordRequest
 import json
+from .settings import accessKeyId, accessSecret
 
-# 读取数据
-with open('config.json', 'r') as f:
-    data = json.load(f)
-
-accessKeyId = data["accessKeyId"]
-accessSecret = data["accessSecret"]
 
 # 获取解析记录，返回字符串
 def get_cloud_ip(DomainName, target_RR):
