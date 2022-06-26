@@ -27,17 +27,16 @@ func (g *GetIpClient) Get() (currentIp string, err error) {
 	currentNode := g
 
 	// 每个节点重复尝试获取 3 次
-	for counter <= (len(GetIpFuncs)+1)*3 {
+	for counter <= len(GetIpFuncs)+1 {
 		currentIp, err = currentNode.getIpFunc()
 		if err == nil {
 			return currentIp, nil
 		}
-		log.Printf("[INFO] 从 %v 节点获取本机 IP 出错: %v\n", currentNode, err)
+		log.Printf("获取本机 IP 出错: %v", err)
 		currentNode = currentNode.next
 		counter++
 	}
 
-	log.Panic("获取本机 IP 出错，请检查网络")
 	return "", fmt.Errorf("所获获取节点均无法获取本机 IP, 请检查网络连接")
 }
 
@@ -65,20 +64,21 @@ func NewGetIpClient() *GetIpClient {
 
 func FromXiaoTao() (string, error) {
 	url := "http://ip.xiaotao233.top/"
+	log.Printf("正在从 %s 获取本机 IP", url)
 	resp, err := http.Get(url)
 	if err != nil {
-		return "", fmt.Errorf("[INFO] 从 %s 获取本机 IP 出错: %v", url, err)
+		return "", err
 	}
 	defer resp.Body.Close()
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", fmt.Errorf("[INFO] 解析本机 IP 响应内容成二进制出错: %v", err)
+		return "", err
 	}
 
 	respMap := make(map[string]string)
 	err = json.Unmarshal(respBytes, &respMap)
 	if err != nil {
-		return "", fmt.Errorf("[INFO] 解析 JSON 数据出错: %v", err)
+		return "", err
 	}
 	return respMap["ip"], nil
 }

@@ -1,0 +1,7 @@
+{
+        "ak": "YOUR ACCESS KEY ID",
+        "aks": "YOUR ACCESS KEY SECRET",
+        "DomainName": "YOUR DomainName",
+        "Type": "A",
+        "RR": "www"
+}
