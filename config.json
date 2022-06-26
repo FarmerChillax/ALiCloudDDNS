@@ -1,7 +1,7 @@
 {
-        "ak": "123-ak",
-        "aks": "aks",
-        "DomainName": "",
-        "Type": "",
-        "RR": ""
+        "ak": "YOUR ACCESS KEY ID",
+        "aks": "YOUR ACCESS KEY SECRET",
+        "DomainName": "YOUR DomainName",
+        "Type": "A",
+        "RR": "www"
 }

@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/FarmerChillax/ALiCloudDDNS/agent"
+	"github.com/FarmerChillax/ALiCloudDDNS/config"
 )
 
 type DNSAgent interface {
@@ -17,11 +18,11 @@ type DDNSClient struct {
 	DnsHostIp          string
 }
 
-func New() *DDNSClient {
+func New(config *config.DDNSConfig) *DDNSClient {
 	// 用于获取本机 IP 的节点
 	getIpClient := NewGetIpClient()
 	// 当前版本只做阿里云
-	aliAgent := agent.NewALiAgent()
+	aliAgent := agent.NewALiAgent(config)
 	dnsRecordIp, err := aliAgent.GetRecordIp()
 	if err != nil {
 		log.Fatalf("获取阿里云记录失败, err: %v", err)
@@ -46,16 +47,16 @@ func (d *DDNSClient) Run() {
 		// 则更新解析 IP
 		ok, err := d.Agent.Update(currentIp)
 		if err != nil {
-			log.Fatalf("[INFO] 更新解析 IP 出错, err: %v\n", err)
+			log.Fatalf("更新解析 IP 出错, err: %v\n", err)
 			return
 		}
 		if ok {
 			log.Printf("[SUCCESS] 更新解析成功, %s -> %s", d.DnsHostIp, currentIp)
 			d.DnsHostIp = currentIp
 		} else {
-			log.Println("[INFO] 更新解析 IP 失败")
+			log.Println("更新解析 IP 失败")
 		}
 	} else {
-		log.Println("[INFO] IP 未发生变更, 无需更改...")
+		log.Println("IP 未发生变更, 无需更改...")
 	}
 }

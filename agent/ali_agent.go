@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/FarmerChillax/ALiCloudDDNS/config"
 	dns "github.com/alibabacloud-go/alidns-20150109/v2/client"
-	env "github.com/alibabacloud-go/darabonba-env/client"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/client"
-
-	"github.com/alibabacloud-go/tea/tea"
 )
 
 type ALiDNSAgent struct {
@@ -57,25 +55,20 @@ func (a *ALiDNSAgent) Update(ip string) (bool, error) {
 	return true, nil
 }
 
-func NewALiAgent() *ALiDNSAgent {
-	// fmt.Println(*env.GetEnv(tea.String("ACCESS_KEY_ID")),
-	// 	*env.GetEnv(tea.String("ACCESS_KEY_SECRET")),
-	// 	*env.GetEnv(tea.String("RegionId")))
-	config := &openapi.Config{
-		AccessKeyId:     env.GetEnv(tea.String("ACCESS_KEY_ID")),
-		AccessKeySecret: env.GetEnv(tea.String("ACCESS_KEY_SECRET")),
-		RegionId:        env.GetEnv(tea.String("RegionId")),
-	}
-
-	client, err := dns.NewClient(config)
+func NewALiAgent(conf *config.DDNSConfig) *ALiDNSAgent {
+	client, err := dns.NewClient(&openapi.Config{
+		AccessKeyId:     &conf.AccessKey,
+		AccessKeySecret: &conf.AccessKeySecret,
+		RegionId:        &conf.RegionId,
+	})
 	if err != nil {
 		log.Fatalf("[ERR] 初始化阿里云 Agent 错误: %v\n", err)
 	}
 
 	return &ALiDNSAgent{
 		dnsClient:  client,
-		domainName: *env.GetEnv(tea.String("DomainName")),
-		recordType: *env.GetEnv(tea.String("Type")),
-		RR:         *env.GetEnv(tea.String("RR")),
+		domainName: conf.DomainName,
+		recordType: conf.Type,
+		RR:         conf.RR,
 	}
 }
