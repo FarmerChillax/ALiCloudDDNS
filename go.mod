@@ -4,8 +4,11 @@ go 1.18
 
 require (
 	github.com/alibabacloud-go/alidns-20150109/v2 v2.0.1
+	github.com/alibabacloud-go/darabonba-env v1.0.0
 	github.com/alibabacloud-go/darabonba-openapi v0.1.18
 	github.com/alibabacloud-go/tea v1.1.19
+	github.com/alibabacloud-go/tea-console v1.0.0
+	github.com/alibabacloud-go/tea-utils v1.4.3
 )
 
 require (
@@ -13,7 +16,6 @@ require (
 	github.com/alibabacloud-go/debug v0.0.0-20190504072949-9472017b5c68 // indirect
 	github.com/alibabacloud-go/endpoint-util v1.1.0 // indirect
 	github.com/alibabacloud-go/openapi-util v0.0.11 // indirect
-	github.com/alibabacloud-go/tea-utils v1.4.3 // indirect
 	github.com/alibabacloud-go/tea-xml v1.1.2 // indirect
 	github.com/aliyun/credentials-go v1.1.2 // indirect
 	github.com/clbanning/mxj/v2 v2.5.6 // indirect

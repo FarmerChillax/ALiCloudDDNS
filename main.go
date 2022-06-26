@@ -1,13 +1,13 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/FarmerChillax/ALiCloudDDNS/client"
 )
 
 func main() {
-	ddnsClient := client.New("www")
-	fmt.Println("初始化成功:", ddnsClient)
+	ddnsClient := client.New()
+	log.Println("初始化 ddns 客户端成功:", *ddnsClient)
 	ddnsClient.Run()
 }
