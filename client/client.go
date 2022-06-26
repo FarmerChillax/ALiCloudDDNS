@@ -49,8 +49,13 @@ func (d *DDNSClient) Run() {
 			log.Fatalf("[INFO] 更新解析 IP 出错, err: %v\n", err)
 			return
 		}
-		if !ok {
+		if ok {
+			log.Printf("[SUCCESS] 更新解析成功, %s -> %s", d.DnsHostIp, currentIp)
+			d.DnsHostIp = currentIp
+		} else {
 			log.Println("[INFO] 更新解析 IP 失败")
 		}
+	} else {
+		log.Println("[INFO] IP 未发生变更, 无需更改...")
 	}
 }
