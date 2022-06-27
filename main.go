@@ -1,19 +1,19 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	_ "net/http/pprof"
 	"time"
 
-	"github.com/FarmerChillax/ALiCloudDDNS/client"
 	"github.com/FarmerChillax/ALiCloudDDNS/cmd"
-	"github.com/FarmerChillax/ALiCloudDDNS/config"
 )
 
-var duration = 10 * time.Minute
+var duration = 10 * time.Second
 
 func main() {
+	// defer profile.Start().Stop()
+	// defer profile.Start(profile.MemProfile, profile.MemProfileRate(1)).Stop()
+
 	cmd.Execute()
 
 	go func() {
@@ -27,11 +27,11 @@ func main() {
 	// 	os.Exit(0)
 	// }()
 	// fmt.Println("load:", config.DDNSConf)
-	ddnsClient := client.New(config.DDNSConf)
-	log.Println("初始化 ddns 客户端成功:", *ddnsClient)
-	timer := time.NewTimer(duration)
-	for ; true; <-timer.C {
-		ddnsClient.Run()
-		timer.Reset(duration)
-	}
+	// ddnsClient := client.New(config.DDNSConf)
+	// log.Println("初始化 ddns 客户端成功:", *ddnsClient)
+	// timer := time.NewTimer(duration)
+	// for ; true; <-timer.C {
+	// 	ddnsClient.Run()
+	// 	timer.Reset(duration)
+	// }
 }
