@@ -7,10 +7,14 @@ import (
 	"time"
 
 	"github.com/FarmerChillax/ALiCloudDDNS/client"
+	"github.com/FarmerChillax/ALiCloudDDNS/cmd"
 	"github.com/FarmerChillax/ALiCloudDDNS/config"
 )
 
+var duration = 10 * time.Minute
+
 func main() {
+	cmd.Execute()
 
 	go func() {
 		http.ListenAndServe(":233", nil)
@@ -22,10 +26,12 @@ func main() {
 	// 	fmt.Scanln(&stop)
 	// 	os.Exit(0)
 	// }()
+	// fmt.Println("load:", config.DDNSConf)
 	ddnsClient := client.New(config.DDNSConf)
 	log.Println("初始化 ddns 客户端成功:", *ddnsClient)
-	for {
+	timer := time.NewTimer(duration)
+	for ; true; <-timer.C {
 		ddnsClient.Run()
-		time.Sleep(10 * time.Minute)
+		timer.Reset(duration)
 	}
 }
