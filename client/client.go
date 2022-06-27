@@ -37,6 +37,11 @@ func New(config *config.DDNSConfig) *DDNSClient {
 }
 
 func (d *DDNSClient) Run() {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Fatalln("recover err:", err)
+		}
+	}()
 	currentIp, err := d.GetCurrentIpClient.Get()
 	if err != nil {
 		log.Println(err.Error())
