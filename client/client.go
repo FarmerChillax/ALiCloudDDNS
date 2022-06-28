@@ -37,6 +37,11 @@ func New(config *config.DDNSConfig) *DDNSClient {
 }
 
 func (d *DDNSClient) Run() {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Fatalln("recover err:", err)
+		}
+	}()
 	currentIp, err := d.GetCurrentIpClient.Get()
 	if err != nil {
 		log.Println(err.Error())
@@ -47,14 +52,12 @@ func (d *DDNSClient) Run() {
 		// 则更新解析 IP
 		ok, err := d.Agent.Update(currentIp)
 		if err != nil {
-			log.Fatalf("更新解析 IP 出错, err: %v\n", err)
+			log.Printf("更新解析 IP 出错, err: %v\n", err)
 			return
 		}
 		if ok {
 			log.Printf("[SUCCESS] 更新解析成功, %s -> %s", d.DnsHostIp, currentIp)
 			d.DnsHostIp = currentIp
-		} else {
-			log.Println("更新解析 IP 失败")
 		}
 	} else {
 		log.Println("IP 未发生变更, 无需更改...")
