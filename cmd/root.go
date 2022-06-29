@@ -21,6 +21,7 @@ func init() {
 	rootCmd.AddCommand(setCmd)
 	rootCmd.AddCommand(startCmd)
 	rootCmd.AddCommand(demoCmd)
+	rootCmd.AddCommand(serverCmd)
 }
 
 // Execute 将所有子命令添加到root命令并适当设置标志。
