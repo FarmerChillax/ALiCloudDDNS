@@ -1,18 +1,21 @@
 package config
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/spf13/viper"
 )
 
 type DDNSConfig struct {
-	AccessKey       string
-	AccessKeySecret string
-	RegionId        string
-	DomainName      string
-	Type            string
-	RR              string
+	AccessKey       string `json:"AK"`
+	AccessKeySecret string `json:"AKS"`
+	RegionId        string `json:"RegionId"`
+	DomainName      string `json:"DomainName"`
+	Type            string `json:"Type"`
+	RR              string `json:"RR"`
 }
 
 var DDNSConf *DDNSConfig
@@ -31,13 +34,40 @@ func init() {
 
 	viper.AutomaticEnv()
 
+	viper.SetDefault("RegionId", "cn-hangzhou")
 	DDNSConf = &DDNSConfig{
-		AccessKey:       viper.GetString("ak"),
-		AccessKeySecret: viper.GetString("aks"),
+		AccessKey:       viper.GetString("AK"),
+		AccessKeySecret: viper.GetString("AKS"),
+		RegionId:        viper.GetString("RegionId"),
 		DomainName:      viper.GetString("DomainName"),
 		Type:            viper.GetString("Type"),
 		RR:              viper.GetString("RR"),
 	}
 
 	// fmt.Println("获取配置文件的map[string]string", viper.GetStringMapString(`app`))
+}
+
+// 保存用户配置
+func (d *DDNSConfig) Save(filename string) error {
+	// 序列化
+	ddnsEncodes, err := json.MarshalIndent(d, "", "\t")
+	if err != nil {
+		return err
+	}
+
+	// 保存到文件中
+	f, err := os.OpenFile(filename, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0600)
+	if err != nil {
+		return err
+	}
+
+	wn, err := f.Write(ddnsEncodes)
+	if err != nil {
+		return err
+	}
+
+	if wn != len(ddnsEncodes) {
+		return fmt.Errorf("保存文件出错，请检查文件")
+	}
+	return nil
 }
