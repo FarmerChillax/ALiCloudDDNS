@@ -7,6 +7,8 @@ import (
 	"github.com/FarmerChillax/ALiCloudDDNS/cmd"
 )
 
+const VERSION = "0.2.0"
+
 var duration = 10 * time.Second
 
 func main() {
