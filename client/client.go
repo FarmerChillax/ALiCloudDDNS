@@ -10,6 +10,8 @@ import (
 type DNSAgent interface {
 	GetRecordIp() (string, error)
 	Update(string) (bool, error)
+	SetName(string)
+	GetName() string
 }
 
 type DDNSClient struct {
