@@ -1,8 +1,8 @@
 {
-	"AK": "YOUR ACCESS KEY ID",
-	"AKS": "YOUR ACCESS KEY SECRET",
-	"RegionId": "cn-hangzhou",
-	"DomainName": "example.com",
-	"Type": "A",
-	"RR": "@"
+  "ak": "YOUR ACCESS KEY ID",
+  "aks": "YOUR ACCESS KEY SECRET",
+  "domainname": "example.com",
+  "regionid": "cn-hangzhou",
+  "rr": "@",
+  "type": "A"
 }

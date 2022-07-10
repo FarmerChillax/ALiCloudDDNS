@@ -3,8 +3,8 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
+	"sync"
 
 	"github.com/spf13/viper"
 )
@@ -18,34 +18,74 @@ type DDNSConfig struct {
 	RR              string `json:"RR"`
 }
 
-var DDNSConf *DDNSConfig
+var (
+	DDNSConf *DDNSConfig
+	one      sync.Once
+)
+
+func New(ak, aks, region, domainName, t, rr string) {
+	if DDNSConf == nil {
+		one.Do(func() {
+			DDNSConf = &DDNSConfig{
+				AccessKey:       ak,
+				AccessKeySecret: aks,
+				RegionId:        region,
+				DomainName:      domainName,
+				Type:            t,
+				RR:              rr,
+			}
+		})
+	}
+}
+
+func Get() *DDNSConfig {
+	return DDNSConf
+}
+
+func Save(filename, fileType string) {
+	viper.WriteConfigAs(fmt.Sprintf("%s.%s", filename, fileType))
+}
+
+func loadDefaultConfig() {
+	viper.SetDefault("RR", "@")
+	viper.SetDefault("Type", "A")
+	viper.SetDefault("RegionId", "cn-hangzhou")
+	viper.SetDefault("DomainName", "example.com")
+	viper.SetDefault("AK", "YOUR ACCESS KEY ID")
+	viper.SetDefault("AKS", "YOUR ACCESS KEY SECRET")
+}
+
+func loadConfigWithFile() error {
+	viper.SetConfigName("config") //
+	//viper.AddConfigPath("/etc/appname/")   //
+	viper.SetConfigType("json")
+	//viper.AddConfigPath("$HOME/.appname")
+	viper.AddConfigPath(".")
+	// 读取配置
+	return viper.ReadInConfig()
+	// if err := viper.ReadInConfig(); err != nil {
+	// 	if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+	// 		return fmt.Errorf("找不到配置文件")
+	// 	}
+	// 	return err
+	// }
+	// return nil
+}
 
 func init() {
-	viper.SetConfigName("config") //指定配置文件的文件名称(不需要制定配置文件的扩展名)
-	//viper.AddConfigPath("/etc/appname/")   //设置配置文件的搜索目录
-	viper.SetConfigType("json")
-	//viper.AddConfigPath("$HOME/.appname")  // 设置配置文件的搜索目录
-	viper.AddConfigPath(".")    // 设置配置文件和可执行二进制文件在用一个目录
-	err := viper.ReadInConfig() // 根据以上配置读取加载配置文件
-	if err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-			log.Fatalf("读取配置文件出错: %v, 请参考 example.json 配置了 config.json 文件", err)
-		}
-	}
-
+	// 加载默认配置项
+	loadDefaultConfig()
+	// 加载配置文件
+	_ = loadConfigWithFile()
+	// 加载环境变量
 	viper.AutomaticEnv()
-
-	viper.SetDefault("RegionId", "cn-hangzhou")
-	DDNSConf = &DDNSConfig{
-		AccessKey:       viper.GetString("AK"),
-		AccessKeySecret: viper.GetString("AKS"),
-		RegionId:        viper.GetString("RegionId"),
-		DomainName:      viper.GetString("DomainName"),
-		Type:            viper.GetString("Type"),
-		RR:              viper.GetString("RR"),
-	}
-
-	// fmt.Println("获取配置文件的map[string]string", viper.GetStringMapString(`app`))
+	// 初始化配置
+	New(viper.GetString("AK"),
+		viper.GetString("AKS"),
+		viper.GetString("RegionId"),
+		viper.GetString("DomainName"),
+		viper.GetString("Type"),
+		viper.GetString("RR"))
 }
 
 // 保存用户配置
