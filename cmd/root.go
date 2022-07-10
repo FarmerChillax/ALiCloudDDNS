@@ -46,7 +46,7 @@ var (
 func init() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(exportCmd)
-	rootCmd.Flags().Int64VarP(&duration, "time", "t", 10, "更新检测间隔")
+	rootCmd.Flags().Int64VarP(&duration, "duration", "d", 10, "更新检测间隔")
 }
 
 func Execute() {
