@@ -1,12 +1,13 @@
 package main
 
 import (
-	"net/http"
 	_ "net/http/pprof"
 	"time"
 
 	"github.com/FarmerChillax/ALiCloudDDNS/cmd"
 )
+
+const VERSION = "0.2.0"
 
 var duration = 10 * time.Second
 
@@ -17,7 +18,7 @@ func main() {
 	cmd.Execute()
 
 	go func() {
-		http.ListenAndServe(":233", nil)
+		// http.ListenAndServe(":233", nil)
 	}()
 
 	// var stop string
@@ -27,6 +28,7 @@ func main() {
 	// 	os.Exit(0)
 	// }()
 	// fmt.Println("load:", config.DDNSConf)
+
 	// ddnsClient := client.New(config.DDNSConf)
 	// log.Println("初始化 ddns 客户端成功:", *ddnsClient)
 	// timer := time.NewTimer(duration)
@@ -34,4 +36,10 @@ func main() {
 	// 	ddnsClient.Run()
 	// 	timer.Reset(duration)
 	// }
+}
+
+func SetLogger() {
+	// log.SetPrefix()
+	// log.SetFlags(0)
+	// log.SetOutput()
 }

@@ -1,7 +1,8 @@
 {
-        "ak": "YOUR ACCESS KEY ID",
-        "aks": "YOUR ACCESS KEY SECRET",
-        "DomainName": "YOUR DomainName",
-        "Type": "A",
-        "RR": "www"
+  "ak": "YOUR ACCESS KEY ID",
+  "aks": "YOUR ACCESS KEY SECRET",
+  "domainname": "example.com",
+  "regionid": "cn-hangzhou",
+  "rr": "@",
+  "type": "A"
 }

@@ -9,11 +9,14 @@ import (
 	openapi "github.com/alibabacloud-go/darabonba-openapi/client"
 )
 
+const AGENT_NAME = "ali"
+
 type ALiDNSAgent struct {
-	dnsClient  *dns.Client
-	domainName string
-	recordType string
-	RR         string
+	agentNickName string
+	dnsClient     *dns.Client
+	domainName    string
+	recordType    string
+	RR            string
 	// 解析记录
 	Record *dns.DescribeDomainRecordsResponseBodyDomainRecordsRecord
 }
@@ -53,6 +56,18 @@ func (a *ALiDNSAgent) Update(ip string) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+func (a *ALiDNSAgent) SetName(userNickName string) {
+	a.agentNickName = userNickName
+}
+
+func (a *ALiDNSAgent) GetName() string {
+	if a.agentNickName != "" {
+		return fmt.Sprintf("[%s - %s]", AGENT_NAME, a.agentNickName)
+	}
+	return fmt.Sprintf("[%s]", AGENT_NAME)
+
 }
 
 func NewALiAgent(conf *config.DDNSConfig) *ALiDNSAgent {
