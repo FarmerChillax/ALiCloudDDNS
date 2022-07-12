@@ -8,6 +8,7 @@ import (
 
 	"github.com/FarmerChillax/ALiCloudDDNS/client"
 	"github.com/FarmerChillax/ALiCloudDDNS/config"
+	flog "github.com/FarmerChillax/ALiCloudDDNS/log"
 	"github.com/spf13/cobra"
 )
 
@@ -18,13 +19,16 @@ var rootCmd = &cobra.Command{
 目前仅支持阿里云服务，后续有需要会做更多的云服务商支持`,
 	// 如果有相关的 action 要执行，请取消下面这行代码的注释
 	Run: func(cmd *cobra.Command, args []string) {
-
+		if logFileName != "" {
+			flog.SetLoggerWithFile(logFileName)
+		}
 		var stop string
 		go func() {
 			log.Println("[Start] 程序运行中, 按任意键关闭...")
 			fmt.Scanln(&stop)
 			os.Exit(0)
 		}()
+
 		ddnsConfig := config.Get()
 		ddnsClient := client.New(ddnsConfig)
 		log.Printf("初始化 ddns 客户端成功, 客户端代理为: %s, 当前域名解析为: %s",
@@ -39,14 +43,15 @@ var rootCmd = &cobra.Command{
 }
 
 var (
-	duration       int64
-	configFileName string
+	duration    int64
+	logFileName string
 )
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(exportCmd)
 	rootCmd.Flags().Int64VarP(&duration, "duration", "d", 10, "更新检测间隔")
+	rootCmd.Flags().StringVarP(&logFileName, "log-filename", "l", "", "日志文件名")
 }
 
 func Execute() {
