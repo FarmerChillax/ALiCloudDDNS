@@ -7,6 +7,9 @@ var exportCmd = &cobra.Command{
 	Short: "导出相关文件",
 }
 
+var exportPath string = "./fddns.service"
+
 func init() {
 	exportCmd.AddCommand(configCmd)
+	exportCmd.AddCommand(serviceCmd)
 }
