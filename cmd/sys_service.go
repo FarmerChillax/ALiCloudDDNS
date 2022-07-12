@@ -17,7 +17,7 @@ Description=fddns client
 [Service]
 Type=simple
 WorkingDirectory=%s 
-ExecStart= %s # ./fddns -c <your config filename>
+ExecStart=%s # ./fddns -c <your config filename>
 KillMode=process
 Restart=on-failure
 RestartSec=3s
