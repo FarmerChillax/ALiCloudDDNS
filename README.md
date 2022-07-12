@@ -15,9 +15,10 @@
 ```console
 $ export ak="Your_Access_Key"
 $ export aks="YOUR_ACCESS_KEY_SECRET"
-$ export DomainName="example.com"
-$ export Type="A"
+$ export domainname="example.com"
+$ export type="A"
 $ export RR="www"
+$ export regionid="cn-hangzhou"
 ```
 
 **使用配置文件**
@@ -25,16 +26,17 @@ $ export RR="www"
 
 ```json config.json
 {
-        "ak": "YOUR ACCESS KEY ID",
-        "aks": "YOUR ACCESS KEY SECRET",
-        "DomainName": "YOUR DomainName",
-        "Type": "A",
-        "RR": "www"
+  "ak": "YOUR ACCESS KEY ID",
+  "aks": "YOUR ACCESS KEY SECRET",
+  "domainname": "example.com",
+  "regionid": "cn-hangzhou",
+  "rr": "@",
+  "type": "A"
 }
 ```
 
 2. 启动客户端
 
 ```console
-$ ./ddns
+$ ./fddns
 ```
