@@ -21,8 +21,10 @@ type DDNSClient struct {
 }
 
 func New(config *config.DDNSConfig) *DDNSClient {
+	var ddnsClient *DDNSClient
 	// 用于获取本机 IP 的节点
 	getIpClient := NewGetIpClient()
+	// 初始化 DNS Agent
 	// 当前版本只做阿里云
 	aliAgent := agent.NewALiAgent(config)
 	dnsRecordIp, err := aliAgent.GetRecordIp()
@@ -30,13 +32,17 @@ func New(config *config.DDNSConfig) *DDNSClient {
 		log.Fatalf("获取阿里云记录失败, err: %v", err)
 	}
 
-	ddnsClient := DDNSClient{
+	// 初始化 Notice
+
+	ddnsClient = &DDNSClient{
 		Agent:              aliAgent,
 		GetCurrentIpClient: getIpClient,
 		DnsHostIp:          dnsRecordIp,
 	}
-	return &ddnsClient
+	return ddnsClient
 }
+
+// func (d *DDNSClient) RegistryAgent
 
 func (d *DDNSClient) Run() {
 	defer func() {
