@@ -27,6 +27,14 @@ func New(url string) *Notice {
 	}
 }
 
+func (n *Notice) Success() {
+
+}
+
+func (n *Notice) Error() {
+
+}
+
 func (n *Notice) Push(preIp, currentIp, status string) error {
 	messageContent := fmt.Sprintf(WechatTemplate, preIp, currentIp, status)
 	buffer := bytes.NewBufferString(messageContent)
