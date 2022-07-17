@@ -5,6 +5,7 @@ import (
 
 	"github.com/FarmerChillax/ALiCloudDDNS/agent"
 	"github.com/FarmerChillax/ALiCloudDDNS/config"
+	"github.com/FarmerChillax/ALiCloudDDNS/notice"
 )
 
 type DNSAgent interface {
@@ -18,11 +19,14 @@ type DDNSClient struct {
 	Agent              DNSAgent
 	GetCurrentIpClient *GetIpClient
 	DnsHostIp          string
+	Notice             *notice.Notice
 }
 
 func New(config *config.DDNSConfig) *DDNSClient {
+	var ddnsClient *DDNSClient
 	// 用于获取本机 IP 的节点
 	getIpClient := NewGetIpClient()
+	// 初始化 DNS Agent
 	// 当前版本只做阿里云
 	aliAgent := agent.NewALiAgent(config)
 	dnsRecordIp, err := aliAgent.GetRecordIp()
@@ -30,12 +34,15 @@ func New(config *config.DDNSConfig) *DDNSClient {
 		log.Fatalf("获取阿里云记录失败, err: %v", err)
 	}
 
-	ddnsClient := DDNSClient{
+	// 初始化 Notice
+	notice := notice.New(config.NoticeUrl)
+	ddnsClient = &DDNSClient{
 		Agent:              aliAgent,
 		GetCurrentIpClient: getIpClient,
 		DnsHostIp:          dnsRecordIp,
+		Notice:             notice,
 	}
-	return &ddnsClient
+	return ddnsClient
 }
 
 func (d *DDNSClient) Run() {
@@ -55,10 +62,12 @@ func (d *DDNSClient) Run() {
 		ok, err := d.Agent.Update(currentIp)
 		if err != nil {
 			log.Printf("更新解析 IP 出错, err: %v\n", err)
+			d.Notice.Push(d.DnsHostIp, currentIp, "error")
 			return
 		}
 		if ok {
 			log.Printf("[SUCCESS] 更新解析成功, %s -> %s", d.DnsHostIp, currentIp)
+			d.Notice.Push(d.DnsHostIp, currentIp, "success")
 			d.DnsHostIp = currentIp
 		}
 	} else {
