@@ -4,5 +4,6 @@
   "domainname": "example.com",
   "regionid": "cn-hangzhou",
   "rr": "@",
-  "type": "A"
+  "type": "A",
+  "url": ""
 }

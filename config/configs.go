@@ -16,6 +16,7 @@ type DDNSConfig struct {
 	DomainName      string `json:"DomainName"`
 	Type            string `json:"Type"`
 	RR              string `json:"RR"`
+	NoticeUrl       string `json:"url"`
 }
 
 var (
@@ -23,7 +24,7 @@ var (
 	one      sync.Once
 )
 
-func New(ak, aks, region, domainName, t, rr string) {
+func New(ak, aks, region, domainName, t, rr, url string) {
 	if DDNSConf == nil {
 		one.Do(func() {
 			DDNSConf = &DDNSConfig{
@@ -33,6 +34,7 @@ func New(ak, aks, region, domainName, t, rr string) {
 				DomainName:      domainName,
 				Type:            t,
 				RR:              rr,
+				NoticeUrl:       url,
 			}
 		})
 	}
@@ -53,6 +55,7 @@ func loadDefaultConfig() {
 	viper.SetDefault("DomainName", "example.com")
 	viper.SetDefault("AK", "YOUR ACCESS KEY ID")
 	viper.SetDefault("AKS", "YOUR ACCESS KEY SECRET")
+	viper.SetDefault("url", "")
 }
 
 func loadConfigWithFile() error {
@@ -85,7 +88,8 @@ func init() {
 		viper.GetString("RegionId"),
 		viper.GetString("DomainName"),
 		viper.GetString("Type"),
-		viper.GetString("RR"))
+		viper.GetString("RR"),
+		viper.GetString("url"))
 }
 
 // 保存用户配置

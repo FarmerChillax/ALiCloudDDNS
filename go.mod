@@ -9,7 +9,6 @@ require (
 	github.com/alibabacloud-go/tea v1.1.19
 	github.com/alibabacloud-go/tea-console v1.0.0
 	github.com/alibabacloud-go/tea-utils v1.4.3
-	github.com/mitchellh/go-homedir v1.1.0
 )
 
 require (
