@@ -66,13 +66,6 @@ func loadConfigWithFile() error {
 	viper.AddConfigPath(".")
 	// 读取配置
 	return viper.ReadInConfig()
-	// if err := viper.ReadInConfig(); err != nil {
-	// 	if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-	// 		return fmt.Errorf("找不到配置文件")
-	// 	}
-	// 	return err
-	// }
-	// return nil
 }
 
 func init() {
