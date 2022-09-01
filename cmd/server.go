@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 
+	"github.com/FarmerChillax/ALiCloudDDNS/config"
 	"github.com/FarmerChillax/ALiCloudDDNS/proto/ddns_server"
 	"github.com/FarmerChillax/ALiCloudDDNS/server"
 	"github.com/spf13/cobra"
@@ -23,7 +24,9 @@ var serverCmd = &cobra.Command{
 
 		grpcServer := grpc.NewServer()
 
-		ddns_server.RegisterDdnsServerServer(grpcServer, server.NewDdnsServer())
+		ddnsConfig := config.Get()
+		ddnsServer := server.NewDdnsServer(ddnsConfig)
+		ddns_server.RegisterDdnsServerServer(grpcServer, ddnsServer)
 
 		log.Printf("starting gRPC listener on port: %v", address)
 		if err := grpcServer.Serve(lis); err != nil {
