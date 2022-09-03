@@ -1,9 +1,7 @@
 package cmd
 
 import (
-	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"github.com/FarmerChillax/ALiCloudDDNS/client"
@@ -23,12 +21,6 @@ var rootCmd = &cobra.Command{
 		if logFileName != "" {
 			flog.SetLoggerWithFile(logFileName)
 		}
-		var stop string
-		go func() {
-			log.Println("[Start] 程序运行中, 按任意键关闭...")
-			fmt.Scanln(&stop)
-			os.Exit(0)
-		}()
 
 		ddnsConfig := config.Get()
 		ddnsClient := client.New(ddnsConfig)
