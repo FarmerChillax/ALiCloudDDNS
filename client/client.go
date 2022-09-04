@@ -1,11 +1,15 @@
 package client
 
 import (
+	"context"
 	"log"
 
 	"github.com/FarmerChillax/ALiCloudDDNS/agent"
 	"github.com/FarmerChillax/ALiCloudDDNS/config"
 	"github.com/FarmerChillax/ALiCloudDDNS/notice"
+	"github.com/FarmerChillax/ALiCloudDDNS/proto/ddns_server"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type DNSAgent interface {
@@ -20,6 +24,7 @@ type DDNSClient struct {
 	GetCurrentIpClient *GetIpClient
 	DnsHostIp          string
 	Notice             *notice.Notice
+	heartClient        *grpc.ClientConn
 }
 
 func New(config *config.DDNSConfig) *DDNSClient {
@@ -33,7 +38,6 @@ func New(config *config.DDNSConfig) *DDNSClient {
 	if err != nil {
 		log.Fatalf("获取阿里云记录失败, err: %v", err)
 	}
-
 	// 初始化 Notice
 	notice := notice.New(config.NoticeUrl)
 	ddnsClient = &DDNSClient{
@@ -42,7 +46,19 @@ func New(config *config.DDNSConfig) *DDNSClient {
 		DnsHostIp:          dnsRecordIp,
 		Notice:             notice,
 	}
+	// 用于获取本机 IP 的节点
+	if config.ServerAddr != "" {
+		conn, err := grpc.Dial(config.ServerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			log.Fatalf("did not connect: %v", err)
+		}
+		ddnsClient.RegisterHeartBeatClientConn(conn)
+	}
 	return ddnsClient
+}
+
+func (d *DDNSClient) RegisterHeartBeatClientConn(conn *grpc.ClientConn) {
+	d.heartClient = conn
 }
 
 func (d *DDNSClient) Run() {
@@ -51,6 +67,10 @@ func (d *DDNSClient) Run() {
 			log.Fatalln("recover err:", err)
 		}
 	}()
+	if d.heartClient != nil {
+		client := ddns_server.NewDdnsServerClient(d.heartClient)
+		client.HeartBeatServer(context.Background())
+	}
 	currentIp, err := d.GetCurrentIpClient.Get()
 	if err != nil {
 		log.Println(err.Error())

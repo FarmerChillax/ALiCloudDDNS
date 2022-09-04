@@ -10,13 +10,14 @@ import (
 )
 
 type DDNSConfig struct {
-	AccessKey       string `json:"AK"`
-	AccessKeySecret string `json:"AKS"`
-	RegionId        string `json:"RegionId"`
-	DomainName      string `json:"DomainName"`
-	Type            string `json:"Type"`
-	RR              string `json:"RR"`
-	NoticeUrl       string `json:"url"`
+	AccessKey       string `json:"AK,omitempty"`
+	AccessKeySecret string `json:"AKS,omitempty"`
+	RegionId        string `json:"RegionId,omitempty"`
+	DomainName      string `json:"DomainName,omitempty"`
+	Type            string `json:"Type,omitempty"`
+	RR              string `json:"RR,omitempty"`
+	NoticeUrl       string `json:"url,omitempty"`
+	ServerAddr      string `json:"server_addr,omitempty"`
 }
 
 var (
