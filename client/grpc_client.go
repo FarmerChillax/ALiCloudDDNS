@@ -1,10 +1,9 @@
 package client
 
-// type DdnsClient struct {
-// }
+type DDNSHeartBeatClient struct{}
 
-// func NewDdnsClient() *DdnsClient {
-// 	return &DdnsClient{}
-// }
+func NewDDNSHeartBeatClient() *DDNSHeartBeatClient {
+	return &DDNSHeartBeatClient{}
+}
 
-// func (dc *DDNSClient) HeartBeat
+// func (dc *DDNSHeartBeatClient) DDNSHeartBeatClient
