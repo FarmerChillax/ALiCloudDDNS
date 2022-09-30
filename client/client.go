@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/FarmerChillax/ALiCloudDDNS/agent"
 	"github.com/FarmerChillax/ALiCloudDDNS/config"
@@ -81,10 +82,11 @@ func (d *DDNSClient) Run(ctx context.Context) (err error) {
 	return nil
 }
 
-func (d *DDNSClient) HeartBeat(ctx context.Context) {
+func (d *DDNSClient) HeartBeat(ctx context.Context) error {
 	cc, err := grpc.DialContext(ctx, d.HeartServerAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		return
+		log.Println("grpc dial err:", err)
+		return err
 	}
 
 	defer cc.Close()
@@ -92,27 +94,43 @@ func (d *DDNSClient) HeartBeat(ctx context.Context) {
 	dsc := ddns_server.NewDdnsServerClient(cc)
 	ds, err := dsc.HeartBeatServer(ctx)
 	if err != nil {
-		return
+		log.Println("init heartBeat client err:", err)
+		return err
+	}
+	heartBeatResp, err := ds.Recv()
+	if err != nil {
+		log.Println("recv heartBeat err:", err)
+		return err
 	}
 
-	go func() {
-		// heartBeat, err := ds.Recv()
-		// if err != nil {
-		// 	log.Println("grpc HeartBeat recv err:", err)
-		// }
-		//  = heartBeat.GetIp()
-	}()
-	for {
-		err := ds.Send(&ddns_server.HeartBeatClient{Uuid: d.uuid})
+	if d.DnsHostIp != heartBeatResp.GetIp() && heartBeatResp.Ip != "" {
+		ok, err := d.Agent.Update(heartBeatResp.GetIp())
 		if err != nil {
-			log.Println("grpc HeartBeat send err:", err)
+			log.Printf("更新解析 IP 出错, err: %v\n", err)
+			d.Notice.Push(d.DnsHostIp, heartBeatResp.Ip, "error")
+			return
+		}
+		if ok {
+			log.Printf("[SUCCESS] 更新解析成功, %s -> %s", d.DnsHostIp, heartBeatResp.Ip)
+			d.Notice.Push(d.DnsHostIp, heartBeatResp.Ip, "success")
+			d.DnsHostIp = heartBeatResp.Ip
 		}
 	}
 
-}
-
-func (d *DDNSClient) sendHeartBeat(ctx context.Context, msg chan *ddns_server.HeartBeatClient) {
-
+	timer := time.NewTimer(time.Minute * 1)
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-timer.C:
+			// 发送心跳包
+			err = ds.Send(&ddns_server.HeartBeatClient{Uuid: d.uuid})
+			if err != nil {
+				log.Println("heartBeat faild, err:", err)
+				return err
+			}
+		}
+	}
 }
 
 func (d *DDNSClient) LongPoll(ctx context.Context) error {
