@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"log"
 	"time"
 
@@ -25,13 +26,17 @@ var rootCmd = &cobra.Command{
 		}
 
 		ddnsConfig := config.Get()
+		ddnsConfig.ServerAddr = "127.0.0.1:5000"
 		ddnsClient := client.New(ddnsConfig)
 		log.Printf("初始化 ddns 客户端成功, 客户端代理为: %s, 当前域名解析为: %s",
 			ddnsClient.Agent.GetName(), ddnsClient.DnsHostIp)
-		durationT := time.Minute * time.Duration(duration)
+		durationT := time.Second * time.Duration(duration)
 		timer := time.NewTimer(durationT)
 		for ; true; <-timer.C {
-			ddnsClient.Run()
+			err := ddnsClient.Run(context.Background())
+			if err != nil {
+				log.Printf("ddnsClient run err: %v", err)
+			}
 			timer.Reset(durationT)
 		}
 	},

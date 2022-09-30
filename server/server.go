@@ -20,7 +20,6 @@ type DdnsServer struct {
 
 func NewDdnsServer(config *config.DDNSConfig) *DdnsServer {
 	notice := notice.New(config.NoticeUrl)
-	fmt.Println("Init: NewDdnsServer")
 	return &DdnsServer{
 		notice:  notice,
 		clients: make(map[string]string),

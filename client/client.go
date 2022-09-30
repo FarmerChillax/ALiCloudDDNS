@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -28,6 +29,7 @@ type DDNSClient struct {
 	Notice             *notice.Notice
 	HeartServerAddress string
 	uuid               string
+	heartBeatRetry     int8
 }
 
 func New(config *config.DDNSConfig) *DDNSClient {
@@ -55,10 +57,9 @@ func New(config *config.DDNSConfig) *DDNSClient {
 	if config.ServerAddr != "" {
 		// 通过 gRPC 长连接的方式维护心跳
 		ddnsClient.HeartServerAddress = config.ServerAddr
-	} else {
-		// 通过轮询的方式获取本机 IP 的节点
-		ddnsClient.GetCurrentIpClient = NewGetIpClient()
 	}
+	// 通过轮询的方式获取本机 IP 的节点
+	ddnsClient.GetCurrentIpClient = NewGetIpClient()
 
 	return ddnsClient
 }
@@ -70,13 +71,24 @@ func (d *DDNSClient) Run(ctx context.Context) (err error) {
 		}
 	}()
 
-	if d.HeartServerAddress != "" {
+	fmt.Println("heartBeat server address:", d.HeartServerAddress, d.HeartServerAddress != "" && d.heartBeatRetry < 10)
+	// 如果存在自定义 ddns 心跳服务器，则优先使用
+	if d.HeartServerAddress != "" && d.heartBeatRetry < 10 {
 		// 通过 gRPC 双向流维护心跳
-		d.HeartBeat(ctx)
+		err = d.HeartBeat(ctx)
+		if err != nil {
+			log.Printf("grpc heartBeat err: %v", err)
+			d.heartBeatRetry++
+			return err
+		}
 	}
 
 	if d.GetCurrentIpClient != nil {
 		// 通过轮询维护心跳
+		if d.HeartServerAddress != "" && d.heartBeatRetry == 10 {
+			log.Printf("grpc heartBeat retry count max, using longPoll heartBeat.")
+			log.Println("restart to retry grpc heartBeat.")
+		}
 		return d.LongPoll(ctx)
 	}
 	return nil
@@ -102,22 +114,25 @@ func (d *DDNSClient) HeartBeat(ctx context.Context) error {
 		log.Println("recv heartBeat err:", err)
 		return err
 	}
-
+	log.Println("recv:", heartBeatResp)
 	if d.DnsHostIp != heartBeatResp.GetIp() && heartBeatResp.Ip != "" {
 		ok, err := d.Agent.Update(heartBeatResp.GetIp())
 		if err != nil {
 			log.Printf("更新解析 IP 出错, err: %v\n", err)
 			d.Notice.Push(d.DnsHostIp, heartBeatResp.Ip, "error")
-			return
+			return err
 		}
 		if ok {
 			log.Printf("[SUCCESS] 更新解析成功, %s -> %s", d.DnsHostIp, heartBeatResp.Ip)
+			// 推送更新成功提升
 			d.Notice.Push(d.DnsHostIp, heartBeatResp.Ip, "success")
+			// 更新 dns 解析记录，重置重试次数
 			d.DnsHostIp = heartBeatResp.Ip
+			d.heartBeatRetry = 0
 		}
 	}
 
-	timer := time.NewTimer(time.Minute * 1)
+	timer := time.NewTimer(time.Second * 1)
 	for {
 		select {
 		case <-ctx.Done():
@@ -130,6 +145,8 @@ func (d *DDNSClient) HeartBeat(ctx context.Context) error {
 				return err
 			}
 		}
+		log.Printf("send heartBeat to %s success.", d.HeartServerAddress)
+		timer.Reset(time.Second)
 	}
 }
 
