@@ -27,6 +27,7 @@ func NewDdnsServer(config *config.DDNSConfig) *DdnsServer {
 }
 
 func (ds *DdnsServer) HeartBeatServer(stream ddns_server.DdnsServer_HeartBeatServerServer) error {
+	log.Println("recv a client connect.")
 	// 发送客户端请求 IP
 	peer, ok := peer.FromContext(stream.Context())
 	if !ok {

@@ -4,15 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/FarmerChillax/ALiCloudDDNS/agent"
 	"github.com/FarmerChillax/ALiCloudDDNS/config"
 	"github.com/FarmerChillax/ALiCloudDDNS/notice"
 	"github.com/FarmerChillax/ALiCloudDDNS/proto/ddns_server"
 	"github.com/google/uuid"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 type DNSAgent interface {
@@ -95,58 +92,54 @@ func (d *DDNSClient) Run(ctx context.Context) (err error) {
 }
 
 func (d *DDNSClient) HeartBeat(ctx context.Context) error {
-	cc, err := grpc.DialContext(ctx, d.HeartServerAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	ddnsHeartBeatClient, err := NewHeartBeatClient(ctx, d.HeartServerAddress)
 	if err != nil {
-		log.Println("grpc dial err:", err)
 		return err
 	}
+	defer ddnsHeartBeatClient.Close()
 
-	defer cc.Close()
+	recvChan := make(chan *ddns_server.HeartBeat)
+	recvErrorChan := make(chan error)
+	sendChan := make(chan *ddns_server.HeartBeatClient)
+	sendErrorChan := make(chan error)
 
-	dsc := ddns_server.NewDdnsServerClient(cc)
-	ds, err := dsc.HeartBeatServer(ctx)
-	if err != nil {
-		log.Println("init heartBeat client err:", err)
-		return err
-	}
-	heartBeatResp, err := ds.Recv()
-	if err != nil {
-		log.Println("recv heartBeat err:", err)
-		return err
-	}
-	log.Println("recv:", heartBeatResp)
-	if d.DnsHostIp != heartBeatResp.GetIp() && heartBeatResp.Ip != "" {
-		ok, err := d.Agent.Update(heartBeatResp.GetIp())
-		if err != nil {
-			log.Printf("更新解析 IP 出错, err: %v\n", err)
-			d.Notice.Push(d.DnsHostIp, heartBeatResp.Ip, "error")
-			return err
-		}
-		if ok {
-			log.Printf("[SUCCESS] 更新解析成功, %s -> %s", d.DnsHostIp, heartBeatResp.Ip)
-			// 推送更新成功提升
-			d.Notice.Push(d.DnsHostIp, heartBeatResp.Ip, "success")
-			// 更新 dns 解析记录，重置重试次数
-			d.DnsHostIp = heartBeatResp.Ip
-			d.heartBeatRetry = 0
-		}
-	}
+	go ddnsHeartBeatClient.HandleRecv(ctx, recvChan, recvErrorChan)
+	go ddnsHeartBeatClient.HandleSend(ctx, sendChan, sendErrorChan)
 
-	timer := time.NewTimer(time.Second * 1)
+	// 注册本机uuid
+	sendChan <- &ddns_server.HeartBeatClient{Uuid: d.uuid}
+
 	for {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		case <-timer.C:
-			// 发送心跳包
-			err = ds.Send(&ddns_server.HeartBeatClient{Uuid: d.uuid})
-			if err != nil {
-				log.Println("heartBeat faild, err:", err)
-				return err
+		case heartBeatResp := <-recvChan:
+			d.heartBeatRetry = 0
+			// 更新 ip
+			if d.DnsHostIp != heartBeatResp.GetIp() && heartBeatResp.Ip != "" {
+				ok, err := d.Agent.Update(heartBeatResp.GetIp())
+				if err != nil {
+					log.Printf("更新解析 IP 出错, err: %v\n", err)
+					d.Notice.Push(d.DnsHostIp, heartBeatResp.Ip, "error")
+					return err
+				}
+				if ok {
+					log.Printf("[SUCCESS] 更新解析成功, %s -> %s", d.DnsHostIp, heartBeatResp.Ip)
+					// 推送更新成功提升
+					d.Notice.Push(d.DnsHostIp, heartBeatResp.Ip, "success")
+					// 更新 dns 解析记录，重置重试次数
+					d.DnsHostIp = heartBeatResp.Ip
+				}
 			}
+		case err = <-recvErrorChan:
+			d.heartBeatRetry++
+			return err
+		case err = <-sendErrorChan:
+			d.heartBeatRetry++
+			return err
 		}
-		log.Printf("send heartBeat to %s success.", d.HeartServerAddress)
-		timer.Reset(time.Second)
 	}
 }
 
