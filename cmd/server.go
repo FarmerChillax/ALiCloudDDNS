@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-var address = "127.0.0.1:5000"
+var address string
 
 var serverCmd = &cobra.Command{
 	Use:   "server",
@@ -33,4 +33,8 @@ var serverCmd = &cobra.Command{
 			log.Fatalf("failed to serve: %v", err)
 		}
 	},
+}
+
+func init() {
+	serverCmd.Flags().StringVarP(&address, "addr", "a", "127.0.0.1:5000", "监听地址")
 }
