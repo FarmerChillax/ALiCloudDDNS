@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/FarmerChillax/ALiCloudDDNS/config"
 	"github.com/spf13/cobra"
 )
@@ -14,7 +16,8 @@ var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "配置文件",
 	Run: func(cmd *cobra.Command, args []string) {
-		config.Save(fileName, fileType)
+		d := config.New()
+		d.Export(fmt.Sprintf("%s.%s", fileName, fileType))
 	},
 }
 

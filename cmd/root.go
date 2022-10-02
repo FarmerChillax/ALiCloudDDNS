@@ -51,6 +51,7 @@ func init() {
 
 	rootCmd.AddCommand(exportCmd)
 	rootCmd.AddCommand(serverCmd)
+	// rootCmd.AddCommand(clientCmd)
 
 	rootCmd.Flags().Int64VarP(&duration, "duration", "d", 10, "更新检测间隔")
 	rootCmd.Flags().StringVarP(&logFileName, "log-filename", "l", "", "日志文件名")

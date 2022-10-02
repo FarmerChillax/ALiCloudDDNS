@@ -19,7 +19,7 @@ var serverCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		lis, err := net.Listen("tcp", address)
 		if err != nil {
-			// log.FileLog
+			log.Fatalf("net.Listen err: %v", err)
 		}
 
 		grpcServer := grpc.NewServer()

@@ -1,22 +1,21 @@
 package config
 
 import (
-	"encoding/json"
-	"fmt"
-	"os"
+	"errors"
+	"log"
 	"sync"
 
 	"github.com/spf13/viper"
 )
 
 type DDNSConfig struct {
-	AccessKey       string `json:"AK,omitempty"`
-	AccessKeySecret string `json:"AKS,omitempty"`
-	RegionId        string `json:"RegionId,omitempty"`
-	DomainName      string `json:"DomainName,omitempty"`
-	Type            string `json:"Type,omitempty"`
-	RR              string `json:"RR,omitempty"`
-	NoticeUrl       string `json:"url,omitempty"`
+	AccessKey       string `json:"access_key,omitempty"`
+	AccessKeySecret string `json:"access_key_secret,omitempty"`
+	RegionId        string `json:"region_id,omitempty"`
+	DomainName      string `json:"domain_name,omitempty"`
+	Type            string `json:"type,omitempty"`
+	RR              string `json:"rr,omitempty"`
+	NoticeUrl       string `json:"notice_url,omitempty"`
 	ServerAddr      string `json:"server_addr,omitempty"`
 }
 
@@ -25,88 +24,67 @@ var (
 	one      sync.Once
 )
 
-func New(ak, aks, region, domainName, t, rr, url string) {
+func New() *DDNSConfig {
 	if DDNSConf == nil {
 		one.Do(func() {
 			DDNSConf = &DDNSConfig{
-				AccessKey:       ak,
-				AccessKeySecret: aks,
-				RegionId:        region,
-				DomainName:      domainName,
-				Type:            t,
-				RR:              rr,
-				NoticeUrl:       url,
+				AccessKey:       viper.GetString("access_key"),
+				AccessKeySecret: viper.GetString("access_key_secret"),
+				RegionId:        viper.GetString("region_id"),
+				DomainName:      viper.GetString("domain_name"),
+				Type:            viper.GetString("type"),
+				RR:              viper.GetString("rr"),
+				NoticeUrl:       viper.GetString("notice_url"),
+				ServerAddr:      viper.GetString("server_addr"),
 			}
 		})
 	}
+	return DDNSConf
+}
+
+// 导出配置
+// path: 导出配置路径
+func (d *DDNSConfig) Export(path string) error {
+	err := viper.WriteConfigAs(path)
+	if err != nil {
+		log.Printf("viper.WriteConfigAs %s err: %v", path, err)
+	}
+	return nil
 }
 
 func Get() *DDNSConfig {
 	return DDNSConf
 }
 
-func Save(filename, fileType string) {
-	viper.WriteConfigAs(fmt.Sprintf("%s.%s", filename, fileType))
+func init() {
+	viper.AutomaticEnv()
+	loadDefaultConfig()
+	// 加载配置文件
+	if err := loadConfigWithFile(); err != nil && errors.Is(err, viper.ConfigFileNotFoundError{}) {
+		log.Printf("load config from config file error, err msg: %v", err)
+	}
 }
 
 func loadDefaultConfig() {
-	viper.SetDefault("RR", "@")
-	viper.SetDefault("Type", "A")
-	viper.SetDefault("RegionId", "cn-hangzhou")
-	viper.SetDefault("DomainName", "example.com")
-	viper.SetDefault("AK", "YOUR ACCESS KEY ID")
-	viper.SetDefault("AKS", "YOUR ACCESS KEY SECRET")
-	viper.SetDefault("url", "")
+	viper.SetDefault("access_key", "YOUR ACCESS KEY ID")
+	viper.SetDefault("access_key_secret", "YOUR ACCESS KEY SECRET")
+	viper.SetDefault("region_id", "cn-hangzhou")
+	viper.SetDefault("domain_name", "example.com")
+	viper.SetDefault("type", "A")
+	viper.SetDefault("rr", "@")
+	viper.SetDefault("notice_url", "")
+	viper.SetDefault("server_addr", "")
 }
 
 func loadConfigWithFile() error {
-	viper.SetConfigName("config") //
-	//viper.AddConfigPath("/etc/appname/")   //
-	viper.SetConfigType("json")
-	//viper.AddConfigPath("$HOME/.appname")
+	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
+	viper.AddConfigPath("/etc/fddns/")
+	viper.AddConfigPath("$HOME/.fddns")
+	viper.SetConfigType("json")
+	viper.SetConfigType("yaml")
+	viper.SetConfigType("toml")
+	viper.SetConfigType("ini")
 	// 读取配置
 	return viper.ReadInConfig()
-}
-
-func init() {
-	// 加载默认配置项
-	loadDefaultConfig()
-	// 加载配置文件
-	_ = loadConfigWithFile()
-	// 加载环境变量
-	viper.AutomaticEnv()
-	// 初始化配置
-	New(viper.GetString("AK"),
-		viper.GetString("AKS"),
-		viper.GetString("RegionId"),
-		viper.GetString("DomainName"),
-		viper.GetString("Type"),
-		viper.GetString("RR"),
-		viper.GetString("url"))
-}
-
-// 保存用户配置
-func (d *DDNSConfig) Save(filename string) error {
-	// 序列化
-	ddnsEncodes, err := json.MarshalIndent(d, "", "\t")
-	if err != nil {
-		return err
-	}
-
-	// 保存到文件中
-	f, err := os.OpenFile(filename, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0600)
-	if err != nil {
-		return err
-	}
-
-	wn, err := f.Write(ddnsEncodes)
-	if err != nil {
-		return err
-	}
-
-	if wn != len(ddnsEncodes) {
-		return fmt.Errorf("保存文件出错，请检查文件")
-	}
-	return nil
 }
