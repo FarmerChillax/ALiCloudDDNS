@@ -1,9 +1,10 @@
 {
-  "ak": "YOUR ACCESS KEY ID",
-  "aks": "YOUR ACCESS KEY SECRET",
-  "domainname": "example.com",
-  "regionid": "cn-hangzhou",
+  "access_key": "YOUR ACCESS KEY ID",
+  "access_key_secret": "YOUR ACCESS KEY SECRET",
+  "domain_name": "example.com",
+  "notice_url": "",
+  "region_id": "cn-hangzhou",
   "rr": "@",
-  "type": "A",
-  "url": ""
+  "server_addr": "",
+  "type": "A"
 }
