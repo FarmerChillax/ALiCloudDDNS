@@ -13,12 +13,14 @@
 在环境变量中添加下列内容
 
 ```console
-$ export ak="Your_Access_Key"
-$ export aks="YOUR_ACCESS_KEY_SECRET"
-$ export domainname="example.com"
-$ export type="A"
+$ export ACCESS_KEY="Your_Access_Key"
+$ export ACCESS_KEY_SECRET="YOUR_ACCESS_KEY_SECRET"
+$ export DOMAIN_NAME="example.com"
+$ export TYPE="A"
 $ export RR="www"
-$ export regionid="cn-hangzhou"
+$ export REGION_ID="cn-hangzhou"
+$ export NOTICE_URL=""
+$ export SERVER_ADDR="gRPC 服务地址"
 ```
 
 **使用配置文件**
@@ -26,11 +28,13 @@ $ export regionid="cn-hangzhou"
 
 ```json config.json
 {
-  "ak": "YOUR ACCESS KEY ID",
-  "aks": "YOUR ACCESS KEY SECRET",
-  "domainname": "example.com",
-  "regionid": "cn-hangzhou",
+  "access_key": "YOUR ACCESS KEY ID",
+  "access_key_secret": "YOUR ACCESS KEY SECRET",
+  "domain_name": "example.com",
+  "notice_url": "",
+  "region_id": "cn-hangzhou",
   "rr": "@",
+  "server_addr": "",
   "type": "A"
 }
 ```
