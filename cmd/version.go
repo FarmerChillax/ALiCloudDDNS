@@ -3,15 +3,14 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/FarmerChillax/ALiCloudDDNS/log"
 	"github.com/spf13/cobra"
 )
 
 var versionCmd = &cobra.Command{
 	Use: "version",
-	
+
 	// Short: ,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Version:", log.VERSION)
+		fmt.Println("Version:", VERSION)
 	},
 }

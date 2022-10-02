@@ -5,6 +5,9 @@ __pycache**
 
 config.json
 
+
+.vscode/
+
 bin/
 
 release/

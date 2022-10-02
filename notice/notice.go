@@ -16,6 +16,27 @@ const WechatTemplate = `{
 }
 `
 
+const OnlineTemplate = `{
+    "msgtype": "markdown",
+    "markdown": {
+        "content": "新客户端<font color=\"success\">上线</font>通知\n
+         > 客户端 IP: <font color=\"comment\">%s</font>
+		 > 上线时间: <font color=\"comment\">%s</font>"
+    }
+}
+`
+
+const OfflineTemplate = `{
+    "msgtype": "markdown",
+    "markdown": {
+        "content": "客户端<font color=\"error\">连接出错</font>\n
+         > 客户端 UUID: <font color=\"warning\">%s</font>
+         > 客户端 IP: <font color=\"comment\">%s</font>
+		 > 离线时间: <font color=\"comment\">%s</font>"
+    }
+}
+`
+
 type Notice struct {
 	Url string
 	// Method  string
@@ -25,6 +46,14 @@ func New(url string) *Notice {
 	return &Notice{
 		Url: url,
 	}
+}
+
+func (n *Notice) Success() {
+
+}
+
+func (n *Notice) Error() {
+
 }
 
 func (n *Notice) Push(preIp, currentIp, status string) error {
@@ -38,21 +67,24 @@ func (n *Notice) Push(preIp, currentIp, status string) error {
 	return nil
 }
 
-// func (n *Notice) worker(ctx context.Context) {
+func (n *Notice) Online(ip, time string) error {
+	messageContent := fmt.Sprintf(OnlineTemplate, ip, time)
+	buffer := bytes.NewBufferString(messageContent)
+	resp, err := http.Post(n.Url, "application/json", buffer)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	return nil
+}
 
-// 	for requestBody := range n.payload {
-// 		buffer := bytes.NewBufferString(requestBody)
-// 		resp, err := http.Post(n.Url, "application/json", buffer)
-// 		if err != nil {
-// 			continue
-// 			// log.Printf()
-// 		}
-// 		defer resp.Body.Close()
-// 		respBody, err := ioutil.ReadAll(resp.Body)
-// 		if err != nil {
-// 			continue
-// 		}
-// 		log.Printf("企微通知成功, resp: %s", respBody)
-// 	}
-
-// }
+func (n *Notice) Offline(uuid, ip, time string) error {
+	messageContent := fmt.Sprintf(OfflineTemplate, uuid, ip, time)
+	buffer := bytes.NewBufferString(messageContent)
+	resp, err := http.Post(n.Url, "application/json", buffer)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	return nil
+}

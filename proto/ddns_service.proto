@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package ddns_server;
+
+option go_package = "./ddns_server";
+
+service DdnsServer {
+    rpc HeartBeatServer (stream HeartBeatClient) returns (stream HeartBeat);
+}
+
+message HeartBeatClient {
+    string uuid = 1;
+}
+
+message HeartBeat {
+    string ip = 1;
+}
