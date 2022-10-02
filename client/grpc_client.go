@@ -11,10 +11,9 @@ import (
 )
 
 var (
-	GRPCError = errors.New("grpc heartBeat error")
+	GRPCError             = errors.New("grpc heartBeat error")
+	ErrNewHeartBeatClient = errors.New("new heartBeat client error")
 )
-
-type baseGrpcClient struct{}
 
 type HeartBeatClient struct {
 	ddns_server.DdnsServer_HeartBeatServerClient

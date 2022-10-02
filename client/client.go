@@ -2,7 +2,7 @@ package client
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"log"
 
 	"github.com/FarmerChillax/ALiCloudDDNS/agent"
@@ -68,14 +68,16 @@ func (d *DDNSClient) Run(ctx context.Context) (err error) {
 		}
 	}()
 
-	fmt.Println("heartBeat server address:", d.HeartServerAddress, d.HeartServerAddress != "" && d.heartBeatRetry < 10)
 	// 如果存在自定义 ddns 心跳服务器，则优先使用
 	if d.HeartServerAddress != "" && d.heartBeatRetry < 10 {
 		// 通过 gRPC 双向流维护心跳
 		err = d.HeartBeat(ctx)
 		if err != nil {
-			log.Printf("grpc heartBeat err: %v", err)
-			d.heartBeatRetry++
+			if errors.Is(err, ErrNewHeartBeatClient) || errors.Is(err, GRPCError) {
+				d.heartBeatRetry++
+				return nil
+			}
+			log.Printf("grpc heartBeat err: %v; err type: %T", err, err)
 			return err
 		}
 	}
@@ -84,7 +86,7 @@ func (d *DDNSClient) Run(ctx context.Context) (err error) {
 		// 通过轮询维护心跳
 		if d.HeartServerAddress != "" && d.heartBeatRetry == 10 {
 			log.Printf("grpc heartBeat retry count max, using longPoll heartBeat.")
-			log.Println("restart to retry grpc heartBeat.")
+			log.Println("restart to reuse grpc heartBeat.")
 		}
 		return d.LongPoll(ctx)
 	}
@@ -96,7 +98,8 @@ func (d *DDNSClient) HeartBeat(ctx context.Context) error {
 	defer cancel()
 	ddnsHeartBeatClient, err := NewHeartBeatClient(ctx, d.HeartServerAddress)
 	if err != nil {
-		return err
+		log.Printf("NewHeartBeatClient err: %v", err)
+		return ErrNewHeartBeatClient
 	}
 	defer ddnsHeartBeatClient.Close()
 
@@ -134,11 +137,11 @@ func (d *DDNSClient) HeartBeat(ctx context.Context) error {
 				}
 			}
 		case err = <-recvErrorChan:
-			d.heartBeatRetry++
-			return err
+			log.Printf("recvError err: %v type: %T", err, err)
+			return GRPCError
 		case err = <-sendErrorChan:
-			d.heartBeatRetry++
-			return err
+			log.Printf("sendError err: %v type: %T", err, err)
+			return GRPCError
 		}
 	}
 }
