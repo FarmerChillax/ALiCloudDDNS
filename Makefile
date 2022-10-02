@@ -11,13 +11,13 @@ build-linux:
 build-all: build-darwin build-linux build-win
 
 release-linux:
-	tar -c bin/linux -f release/fddns_0.2.0_linux.tar
+	tar -c bin/linux -f release/fddns_0.3.0_linux.tar
 
 release-darwin:
-	tar -c bin/linux -f release/fddns_0.2.0_darwin.tar
+	tar -c bin/linux -f release/fddns_0.3.0_darwin.tar
 
 release-win:
-	zip -r release/fddns_0.2.0_win.zip  bin/win 
+	zip -r release/fddns_0.3.0_win.zip  bin/win 
 
 release-all: release-linux release-darwin release-win
 
