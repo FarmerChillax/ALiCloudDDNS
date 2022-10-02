@@ -53,8 +53,8 @@ func (d *DDNSConfig) Export(path string) error {
 }
 
 func init() {
-	viper.AutomaticEnv()
 	loadDefaultConfig()
+	viper.AutomaticEnv()
 	// 加载配置文件
 	if err := loadConfigWithFile(); err != nil && errors.Is(err, viper.ConfigFileNotFoundError{}) {
 		log.Printf("load config from config file error, err msg: %v", err)
@@ -77,10 +77,6 @@ func loadConfigWithFile() error {
 	viper.AddConfigPath(".")
 	viper.AddConfigPath("/etc/fddns/")
 	viper.AddConfigPath("$HOME/.fddns")
-	viper.SetConfigType("json")
-	viper.SetConfigType("yaml")
-	viper.SetConfigType("toml")
-	viper.SetConfigType("ini")
 	// 读取配置
 	return viper.ReadInConfig()
 }
