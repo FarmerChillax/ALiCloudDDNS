@@ -52,10 +52,6 @@ func (d *DDNSConfig) Export(path string) error {
 	return nil
 }
 
-func Get() *DDNSConfig {
-	return DDNSConf
-}
-
 func init() {
 	viper.AutomaticEnv()
 	loadDefaultConfig()

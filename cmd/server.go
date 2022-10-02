@@ -24,7 +24,7 @@ var serverCmd = &cobra.Command{
 
 		grpcServer := grpc.NewServer()
 
-		ddnsConfig := config.Get()
+		ddnsConfig := config.New()
 		ddnsServer := server.NewDdnsServer(ddnsConfig)
 		ddns_server.RegisterDdnsServerServer(grpcServer, ddnsServer)
 

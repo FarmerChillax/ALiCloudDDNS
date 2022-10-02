@@ -69,7 +69,7 @@ func (d *DDNSClient) Run(ctx context.Context) (err error) {
 	}()
 
 	// 如果存在自定义 ddns 心跳服务器，则优先使用
-	if d.HeartServerAddress != "" && d.heartBeatRetry < 10 {
+	if d.HeartServerAddress != "" && d.heartBeatRetry < 3 {
 		// 通过 gRPC 双向流维护心跳
 		err = d.HeartBeat(ctx)
 		if err != nil {
@@ -84,8 +84,8 @@ func (d *DDNSClient) Run(ctx context.Context) (err error) {
 
 	if d.GetCurrentIpClient != nil {
 		// 通过轮询维护心跳
-		if d.HeartServerAddress != "" && d.heartBeatRetry == 10 {
-			log.Printf("grpc heartBeat retry count max, using longPoll heartBeat.")
+		if d.HeartServerAddress != "" && d.heartBeatRetry == 3 {
+			log.Printf("grpc heartBeat retry count max, using longPoll mode.")
 			log.Println("restart to reuse grpc heartBeat.")
 		}
 		return d.LongPoll(ctx)
