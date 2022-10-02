@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+
 	"log"
 	"time"
 
@@ -25,7 +26,9 @@ var rootCmd = &cobra.Command{
 			flog.SetLoggerWithFile(logFileName)
 		}
 
+
 		ddnsConfig := config.New()
+
 		ddnsClient := client.New(ddnsConfig)
 		log.Printf("初始化 ddns 客户端成功, 客户端代理为: %s, 当前域名解析为: %s",
 			ddnsClient.Agent.GetName(), ddnsClient.DnsHostIp)
