@@ -31,6 +31,8 @@ LDFLAGS := -s -w
 
 os-archs=darwin:amd64 darwin:arm64 freebsd:386 freebsd:amd64 linux:386 linux:amd64 linux:arm linux:arm64 windows:386 windows:amd64 linux:mips64 linux:mips64le linux:mips:softfloat linux:mipsle:softfloat linux:riscv64
 
+fddns_vesion =  v0.3.1
+
 all: build
 
 build: app
@@ -42,13 +44,9 @@ app:
 		gomips=$(shell echo "$(n)" | cut -d : -f 3);\
 		target_suffix=$${os}_$${arch};\
 		echo "Build $${os}-$${arch}...";\
-		env CGO_ENABLED=0 GOOS=$${os} GOARCH=$${arch} GOMIPS=$${gomips} go build -trimpath -ldflags "$(LDFLAGS)" -o ./release/fddns_$${target_suffix} ;\
+		env CGO_ENABLED=0 GOOS=$${os} GOARCH=$${arch} GOMIPS=$${gomips} go build -trimpath -ldflags "$(LDFLAGS)" -o ./release/"$(fddns_vesion)"/fddns_"$(fddns_vesion)"_$${target_suffix} ;\
 		echo "Build $${os}-$${arch} done";\
 	)
-	@mv ./release/fddns_windows_386 ./release/fddns_windows_386.exe
-	@mv ./release/fddns_windows_amd64 ./release/fddns_windows_amd64.exe
+	@mv ./release/"$(fddns_vesion)"/fddns_"$(fddns_vesion)"_windows_386 ./release/"$(fddns_vesion)"/fddns_"$(fddns_vesion)"_windows_386.exe
+	@mv ./release/"$(fddns_vesion)"/fddns_"$(fddns_vesion)"_windows_amd64 ./release/"$(fddns_vesion)"/fddns_"$(fddns_vesion)"_windows_amd64.exe
 
-
-# @mv ./release/frps_windows_386 ./release/frps_windows_386.exe
-# @mv ./release/frps_windows_amd64 ./release/frps_windows_amd64.exe
-# env CGO_ENABLED=0 GOOS=$${os} GOARCH=$${arch} GOMIPS=$${gomips} go build -trimpath -ldflags "$(LDFLAGS)" -o ./release/frps_$${target_suffix} ./cmd/frps;\
